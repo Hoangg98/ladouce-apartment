@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh toán - AURA CRAFT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              50: '#fdf9ef',
+              100: '#f9f0d6',
+              200: '#f2dfab',
+              300: '#e9c96e',
+              400: '#e2b544',
+              500: '#d4982a',
+              600: '#c4811f',
+              700: '#a3601b',
+              800: '#854c1e',
+              900: '#6e401b',
+            },
+            charcoal: {
+              50: '#f6f6f6',
+              100: '#e7e7e7',
+              200: '#d1d1d1',
+              300: '#b0b0b0',
+              400: '#888888',
+              500: '#6d6d6d',
+              600: '#5d5d5d',
+              700: '#4f4f4f',
+              800: '#2d2d2d',
+              900: '#1a1a1a',
+            },
+            cream: '#faf8f4',
+            champagne: '#c9a96e',
+          },
+          fontFamily: {
+            display: ['"Cormorant Garamond"', 'serif'],
+            body: ['"Jost"', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Jost', sans-serif;
+      background-color: #faf8f4;
+      color: #1a1a1a;
+      overflow-x: hidden;
+    }
+
+    /* Subtle noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Gold shimmer line */
+    .gold-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #c9a96e, transparent);
+    }
+
+    /* Input styling đồng bộ với index.html */
+    input, select {
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c9a96e' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      background-size: 12px;
+      padding-right: 40px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #c9a96e !important;
+    }
+
+    /* CTA button với hover effect như index.html */
+    .cta-btn {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #d4982a, #c9a96e, #e2b544);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .cta-btn:hover::before {
+      opacity: 1;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(201, 169, 110, 0.3);
+    }
+
+    .cta-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-up {
+      animation: fadeUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      opacity: 0;
+    }
+
+    .delay-1 { animation-delay: 0.15s; }
+    .delay-2 { animation-delay: 0.3s; }
+    .delay-3 { animation-delay: 0.45s; }
+
+    /* Decorative diamond */
+    .diamond {
+      width: 6px;
+      height: 6px;
+      background: #c9a96e;
+      transform: rotate(45deg);
+      display: inline-block;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-block;
+      padding: 12px 20px;
+      border-radius: 4px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-success {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    /* Placeholder */
+    ::placeholder {
+      color: #b0b0b0;
+      font-weight: 300;
+    }
+
+    /* Screen toggle */
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* QR Image */
+    .qr-container {
+      border: 1px solid #d1d1d1;
+      border-radius: 4px;
+      padding: 20px;
+      background: white;
+      text-align: center;
+    }
+
+    .qr-container img {
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    /* Copy button style */
+    .copy-btn {
+      background-color: white;
+      border: 1px solid #c9a96e;
+      color: #c9a96e;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      font-family: 'Jost', sans-serif;
+    }
+
+    .copy-btn:hover {
+      background-color: #c9a96e;
+      color: white;
+    }
+
+    .copy-btn.copied {
+      background-color: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="animate-fade-up">
+    <div class="max-w-5xl mx-auto px-6 py-6 md:py-8 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="diamond"></div>
+        <h1 class="font-display text-xl md:text-2xl font-medium tracking-[0.3em] text-charcoal-900 uppercase">
+          Aura Craft
+        </h1>
+        <div class="diamond"></div>
+      </div>
+      <p class="hidden sm:block font-body text-xs tracking-[0.2em] text-charcoal-400 uppercase font-light">
+        Thanh toán
+      </p>
+    </div>
+    <div class="gold-line"></div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex items-center justify-center px-6 py-12 md:py-20">
+    <div class="max-w-2xl w-full">
+
+      <!-- SCREEN 1: Form tạo đơn hàng -->
+      <div id="screen-form" class="screen active">
+        <div class="text-center mb-12">
+          <h2 class="animate-fade-up delay-1 font-display text-4xl md:text-5xl font-light text-charcoal-900 mb-4">
+            Thanh toán đơn hàng
+          </h2>
+          <div class="animate-fade-up delay-2 flex items-center justify-center gap-4">
+            <span class="block w-8 h-px bg-champagne"></span>
+            <div class="diamond" style="width:5px;height:5px;"></div>
+            <span class="block w-8 h-px bg-champagne"></span>
+          </div>
+        </div>
+
+        <div class="animate-fade-up delay-3 bg-white/60 backdrop-blur-sm border border-charcoal-100 rounded-sm p-8 md:p-10 shadow-[0_4px_40px_rgba(0,0,0,0.04)]">
+          <form id="orderForm" class="space-y-5 text-left">
+
+            <!-- Họ và tên -->
+            <div class="form-field">
+              <label class="block font-body text-[11px] tracking-[0.15em] text-charcoal-500 uppercase font-medium mb-2">
+                Họ và tên <span class="text-gold-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="customerName"
+                placeholder="Nhập họ tên đầy đủ"
+                required
+                class="w-full bg-cream border border-charcoal-200 rounded-sm px-4 py-3 font-body text-sm text-charcoal-800 font-light transition-colors duration-300"
+              >
+            </div>
+
+            <!-- Số điện thoại / Zalo -->
+            <div class="form-field">
+              <label class="block font-body text-[11px] tracking-[0.15em] text-charcoal-500 uppercase font-medium mb-2">
+                Số điện thoại / Zalo <span class="text-gold-500">*</span>
+              </label>
+              <input
+                type="tel"
+                id="contact"
+                placeholder="Nhập số điện thoại"
+                required
+                class="w-full bg-cream border border-charcoal-200 rounded-sm px-4 py-3 font-body text-sm text-charcoal-800 font-light transition-colors duration-300"
+              >
+            </div>
+
+            <!-- Sản phẩm -->
+            <div class="form-field">
+              <label class="block font-body text-[11px] tracking-[0.15em] text-charcoal-500 uppercase font-medium mb-2">
+                Sản phẩm <span class="text-gold-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="product"
+                placeholder="Tên sản phẩm"
+                value="Aura Craft Jewelry"
+                required
+                class="w-full bg-cream border border-charcoal-200 rounded-sm px-4 py-3 font-body text-sm text-charcoal-800 font-light transition-colors duration-300"
+              >
+            </div>
+
+            <!-- Số tiền VND -->
+            <div class="form-field">
+              <label class="block font-body text-[11px] tracking-[0.15em] text-charcoal-500 uppercase font-medium mb-2">
+                Số tiền (VND) <span class="text-gold-500">*</span>
+              </label>
+              <input
+                type="number"
+                id="amount"
+                placeholder="Nhập số tiền"
+                value="2000"
+                min="2000"
+                required
+                class="w-full bg-cream border border-charcoal-200 rounded-sm px-4 py-3 font-body text-sm text-charcoal-800 font-light transition-colors duration-300"
+              >
+              <p class="text-xs text-charcoal-400 font-light mt-2">Tối thiểu: 2.000 VND</p>
+            </div>
+
+            <!-- Nút tạo đơn -->
+            <button
+              type="button"
+              id="createOrderBtn"
+              class="cta-btn w-full mt-8 bg-gold-500 text-white py-3 rounded-sm font-body text-sm font-medium tracking-wide uppercase transition-all duration-300"
+            >
+              <span>Tạo đơn hàng & Thanh toán</span>
+            </button>
+
+            <p class="text-xs text-charcoal-400 text-center font-light">
+              Sau khi tạo đơn, quét mã QR để thanh toán. Bạn không mất phí nào thêm.
+            </p>
+          </form>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: Hiển thị QR + Polling trạng thái -->
+      <div id="screen-payment" class="screen">
+        <div class="text-center mb-8">
+          <h2 class="font-display text-4xl md:text-5xl font-light text-charcoal-900 mb-4">
+            Quét mã QR để thanh toán
+          </h2>
+          <div class="flex items-center justify-center gap-4">
+            <span class="block w-8 h-px bg-champagne"></span>
+            <div class="diamond" style="width:5px;height:5px;"></div>
+            <span class="block w-8 h-px bg-champagne"></span>
+          </div>
+        </div>
+
+        <div class="bg-white/60 backdrop-blur-sm border border-charcoal-100 rounded-sm p-8 md:p-10 shadow-[0_4px_40px_rgba(0,0,0,0.04)]">
+
+          <!-- Thông tin đơn hàng -->
+          <div class="mb-8 pb-6 border-b border-charcoal-200">
+            <p class="font-body text-[11px] tracking-[0.15em] text-charcoal-500 uppercase font-medium mb-4">Thông tin đơn hàng</p>
+            <div class="space-y-3 text-left">
+              <div class="flex justify-between items-center">
+                <span class="font-body text-sm text-charcoal-600">Mã đơn:</span>
+                <span class="font-display text-lg font-medium text-charcoal-900" id="displayOrderId">DON0000</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="font-body text-sm text-charcoal-600">Sản phẩm:</span>
+                <span class="font-body text-sm text-charcoal-800" id="displayProduct">—</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="font-body text-sm text-charcoal-600">Số tiền:</span>
+                <span class="font-body text-lg font-medium text-gold-500" id="displayAmount">0 VND</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mã QR -->
+          <div class="mb-8 text-center">
+            <p class="font-body text-[11px] tracking-[0.15em] text-charcoal-500 uppercase font-medium mb-4">Mã VietQR</p>
+            <div class="qr-container mb-4">
+              <img id="qrImage" src="" alt="Mã QR thanh toán" style="max-width: 300px;">
+            </div>
+            <p class="text-xs text-charcoal-400 font-light">
+              Mở app ngân hàng hoặc Zalo và quét mã QR bên trên
+            </p>
+          </div>
+
+          <!-- Thông tin chuyển khoản thủ công -->
+          <div class="mb-8 pb-6 border-b border-charcoal-200">
+            <p class="font-body text-[11px] tracking-[0.15em] text-charcoal-500 uppercase font-medium mb-4">
+              Hoặc chuyển khoản thủ công
+            </p>
+            <div class="space-y-3 text-left bg-gold-50 p-4 rounded-sm">
+              <div class="flex justify-between items-start">
+                <span class="font-body text-sm text-charcoal-600">Ngân hàng:</span>
+                <span class="font-body text-sm text-charcoal-800 font-medium">Sacombank</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="font-body text-sm text-charcoal-600">Số TK:</span>
+                <div class="text-right">
+                  <span class="font-body text-sm text-charcoal-800 font-medium">0866041686</span>
+                  <button class="copy-btn ml-2" data-copy="0866041686">Copy</button>
+                </div>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="font-body text-sm text-charcoal-600">Chủ TK:</span>
+                <span class="font-body text-sm text-charcoal-800 font-medium">NGUYEN HOANG</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="font-body text-sm text-charcoal-600">Số tiền:</span>
+                <span class="font-body text-sm text-gold-600 font-medium" id="manualAmount">0 VND</span>
+              </div>
+              <div class="flex justify-between items-start mt-4 pt-4 border-t border-gold-200">
+                <span class="font-body text-sm text-red-600 font-medium">Nội dung CK:</span>
+                <div class="text-right">
+                  <span class="font-display text-base font-medium text-charcoal-900 block" id="manualContent">DON0000</span>
+                  <p class="text-xs text-red-600 font-semibold mt-1">⚠️ Phải đúng nội dung này để hệ thống tự nhận</p>
+                  <button class="copy-btn mt-2" data-copy="">Copy nội dung</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trạng thái thanh toán -->
+          <div class="mb-8 text-center">
+            <div id="statusBadge" class="status-badge status-pending">
+              ⏳ Đang chờ thanh toán...
+            </div>
+            <p class="text-xs text-charcoal-400 font-light mt-4">
+              Hệ thống sẽ tự cập nhật trạng thái khi nhận được tiền
+            </p>
+          </div>
+
+          <!-- Success message (ẩn ban đầu) -->
+          <div id="successMessage" style="display: none;" class="mb-8 text-center bg-green-50 p-6 rounded-sm border border-green-200">
+            <p class="font-body text-sm text-green-800 mb-4">
+              ✅ Cảm ơn bạn! Chúng tôi sẽ liên hệ trong 24h để xác nhận đơn hàng.
+            </p>
+            <a href="index.html" class="cta-btn inline-block bg-gold-500 text-white px-6 py-3 rounded-sm font-body text-sm font-medium tracking-wide uppercase">
+              <span>Quay về trang chủ</span>
+            </a>
+          </div>
+
+          <!-- Nút quay lại -->
+          <button
+            id="backBtn"
+            type="button"
+            class="w-full border border-charcoal-300 text-charcoal-700 py-3 rounded-sm font-body text-sm font-medium tracking-wide uppercase transition-colors duration-300 hover:bg-charcoal-100"
+          >
+            Tạo đơn hàng khác
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-12 border-t border-charcoal-200 py-8">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <p class="font-body text-xs text-charcoal-400 font-light tracking-wide">
+        © 2026 Aura Craft. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ============ CONFIG ============
+    // URL Google Apps Script (user sẽ cung cấp sau khi deploy)
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzCeeMkstXu5u1llaObBR6VW5ZXeRHUIrYzUuye7bzVcW6N1jlT93AXVmJuoxiKqqis/exec';
+
+    // Sepay QR endpoint
+    const SEPAY_QR_URL = 'https://qr.sepay.vn/img';
+
+    // ============ STATE ============
+    let currentOrder = null;
+    let pollingInterval = null;
+
+    // ============ DOM Elements ============
+    const screenForm = document.getElementById('screen-form');
+    const screenPayment = document.getElementById('screen-payment');
+    const createOrderBtn = document.getElementById('createOrderBtn');
+    const backBtn = document.getElementById('backBtn');
+
+    const customerNameInput = document.getElementById('customerName');
+    const contactInput = document.getElementById('contact');
+    const productInput = document.getElementById('product');
+    const amountInput = document.getElementById('amount');
+
+    const displayOrderId = document.getElementById('displayOrderId');
+    const displayProduct = document.getElementById('displayProduct');
+    const displayAmount = document.getElementById('displayAmount');
+    const manualAmount = document.getElementById('manualAmount');
+    const manualContent = document.getElementById('manualContent');
+    const qrImage = document.getElementById('qrImage');
+    const statusBadge = document.getElementById('statusBadge');
+    const successMessage = document.getElementById('successMessage');
+    const copyButtons = document.querySelectorAll('.copy-btn');
+
+    // ============ FUNCTIONS ============
+
+    // Sinh Order ID random: DON + 4 chữ số
+    function generateOrderId() {
+      const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      return `DON${random}`;
+    }
+
+    // Validate form
+    function validateForm() {
+      const name = customerNameInput.value.trim();
+      const contact = contactInput.value.trim();
+      const product = productInput.value.trim();
+      const amount = parseInt(amountInput.value, 10);
+
+      if (!name || !contact || !product || !amount || amount < 2000) {
+        alert('Vui lòng điền đầy đủ thông tin và số tiền >= 2000 VND');
+        return false;
+      }
+      return true;
+    }
+
+    // Gọi Apps Script để tạo đơn
+    async function createOrder(orderId, customerName, contact, product, amount) {
+      try {
+        const url = `${GAS_URL}?action=createOrder&order_id=${orderId}&customer_name=${encodeURIComponent(customerName)}&contact=${encodeURIComponent(contact)}&product=${encodeURIComponent(product)}&amount=${amount}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.success) {
+          return true;
+        } else {
+          alert(`Lỗi: ${data.message || 'Không thể tạo đơn'}`);
+          return false;
+        }
+      } catch (error) {
+        console.error('Lỗi tạo đơn:', error);
+        alert('Lỗi kết nối, vui lòng thử lại');
+        return false;
+      }
+    }
+
+    // Hiển thị màn hình thanh toán
+    function showPaymentScreen(orderId, product, amount) {
+      currentOrder = { orderId, product, amount };
+
+      // Cập nhật hiển thị
+      displayOrderId.textContent = orderId;
+      displayProduct.textContent = product;
+      displayAmount.textContent = `${amount.toLocaleString()} VND`;
+      manualAmount.textContent = `${amount.toLocaleString()} VND`;
+      manualContent.textContent = orderId;
+
+      // Tạo URL QR
+      const qrUrl = `${SEPAY_QR_URL}?acc=0866041686&bank=Sacombank&amount=${amount}&des=${orderId}`;
+      qrImage.src = qrUrl;
+
+      // Update copy button
+      const contentCopyBtn = document.querySelector('[data-copy=""]');
+      if (contentCopyBtn) {
+        contentCopyBtn.setAttribute('data-copy', orderId);
+      }
+
+      // Reset status badge
+      statusBadge.className = 'status-badge status-pending';
+      statusBadge.textContent = '⏳ Đang chờ thanh toán...';
+      successMessage.style.display = 'none';
+
+      // Switch screens
+      screenForm.classList.remove('active');
+      screenPayment.classList.add('active');
+
+      // Bắt đầu polling
+      startPolling(orderId);
+    }
+
+    // Polling mỗi 3 giây để check trạng thái
+    function startPolling(orderId) {
+      // Dừng polling cũ nếu có
+      if (pollingInterval) clearInterval(pollingInterval);
+
+      // Polling mỗi 3 giây
+      pollingInterval = setInterval(async () => {
+        try {
+          const url = `${GAS_URL}?action=checkOrder&order_id=${orderId}`;
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (data.status === 'success') {
+            // Đã thanh toán
+            clearInterval(pollingInterval);
+            statusBadge.className = 'status-badge status-success';
+            statusBadge.textContent = '✅ Thanh toán thành công!';
+            successMessage.style.display = 'block';
+          }
+        } catch (error) {
+          console.error('Lỗi check trạng thái:', error);
+        }
+      }, 3000);
+    }
+
+    // Copy to clipboard
+    copyButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const textToCopy = btn.getAttribute('data-copy');
+        if (textToCopy) {
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Đã copy';
+            btn.classList.add('copied');
+            setTimeout(() => {
+              btn.textContent = originalText;
+              btn.classList.remove('copied');
+            }, 2000);
+          });
+        }
+      });
+    });
+
+    // ============ EVENT LISTENERS ============
+
+    // Nút tạo đơn
+    createOrderBtn.addEventListener('click', async () => {
+      if (!validateForm()) return;
+
+      const orderId = generateOrderId();
+      const customerName = customerNameInput.value.trim();
+      const contact = contactInput.value.trim();
+      const product = productInput.value.trim();
+      const amount = parseInt(amountInput.value, 10);
+
+      createOrderBtn.disabled = true;
+      createOrderBtn.textContent = 'Đang tạo đơn...';
+
+      const success = await createOrder(orderId, customerName, contact, product, amount);
+
+      if (success) {
+        showPaymentScreen(orderId, product, amount);
+      }
+
+      createOrderBtn.disabled = false;
+      createOrderBtn.innerHTML = '<span>Tạo đơn hàng & Thanh toán</span>';
+    });
+
+    // Nút quay lại
+    backBtn.addEventListener('click', () => {
+      if (pollingInterval) clearInterval(pollingInterval);
+      screenPayment.classList.remove('active');
+      screenForm.classList.add('active');
+      
+      // Reset form
+      customerNameInput.value = '';
+      contactInput.value = '';
+      productInput.value = 'Aura Craft Jewelry';
+      amountInput.value = '2000';
+      
+      currentOrder = null;
+    });
+
+    // Debug: log state
+    console.log('Trang thanh toán đã load. Chờ user điền form.');
+  </script>
+
+</body>
+</html>
