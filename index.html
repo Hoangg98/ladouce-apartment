@@ -400,6 +400,23 @@ p {
   color: var(--gold);
 }
 
+/* Nút Trả lời cho mobile */
+.btn-quiz-submit {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px 24px;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  background: var(--wine);
+}
+
+.btn-quiz-submit:disabled {
+  background: var(--ink-soft);
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .quiz-feedback {
   font-family: 'Caveat', cursive;
   font-size: 22px;
@@ -1206,6 +1223,7 @@ p {
         id="quiz-input" 
         placeholder="Câu trả lời..."
         autocomplete="off">
+      <button class="btn btn-quiz-submit" id="quiz-submit-btn" onclick="checkQuiz()">Trả lời</button>
       <div class="quiz-feedback" id="quiz-feedback"></div>
     </div>
     
@@ -1232,7 +1250,7 @@ p {
           playsinline
           preload="metadata"
           controls>
-          <source src="story.mp4" type="video/mp4">
+          <source src="Story.mp4" type="video/mp4">
           Trình duyệt không hỗ trợ video.
         </video>
         
@@ -1514,6 +1532,11 @@ function renderQuiz() {
   input.classList.remove('error', 'success');
   input.placeholder = 'Câu trả lời...';
   
+  // Re-enable nút Trả lời
+  const submitBtn = document.getElementById('quiz-submit-btn');
+  submitBtn.disabled = false;
+  submitBtn.style.display = 'block';
+  
   document.getElementById('quiz-feedback').textContent = '';
   document.getElementById('quiz-feedback').classList.remove('success');
   
@@ -1542,6 +1565,7 @@ function checkQuiz() {
   if (correct) {
     input.classList.add('success');
     input.disabled = true;
+    document.getElementById('quiz-submit-btn').disabled = true;
     feedback.classList.add('success');
     
     const messages = ['Đúng rồi ♥', 'Em giỏi quá ♥', 'Chuẩn không cần chỉnh ♥'];
@@ -1577,6 +1601,9 @@ function finishQuiz() {
   
   const input = document.getElementById('quiz-input');
   input.style.display = 'none';
+  
+  // Ẩn nút Trả lời khi xong
+  document.getElementById('quiz-submit-btn').style.display = 'none';
   
   const feedback = document.getElementById('quiz-feedback');
   feedback.classList.add('success');
